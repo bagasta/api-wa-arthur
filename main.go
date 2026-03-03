@@ -24,8 +24,19 @@ func main() {
 		log.Fatalf("Fatal: DATABASE_URL is not set")
 	}
 
+	// DATA_DIR allows store.db to be written to a Docker volume (/app/data)
+	dataDir := os.Getenv("DATA_DIR")
+	if dataDir == "" {
+		dataDir = "." // default: current directory
+	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8101"
+	}
+
 	InitDB(dbUrl)
-	ConnectWhatsapp()
+	ConnectWhatsapp(dataDir)
 
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
@@ -33,6 +44,6 @@ func main() {
 
 	SetupRoutes(app)
 
-	log.Println("WhatsApp Endpoint starting on :8101")
-	log.Fatal(app.Listen(":8101"))
+	log.Printf("WhatsApp Endpoint starting on :%s", port)
+	log.Fatal(app.Listen(":" + port))
 }

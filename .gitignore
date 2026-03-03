@@ -15,3 +15,6 @@ whatsapp-endpoint
 # OS files
 .DS_Store
 Thumbs.db
+
+# Docker volume data (if mapped locally)
+data/

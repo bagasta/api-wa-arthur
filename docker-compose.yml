@@ -1,0 +1,35 @@
+services:
+  whatsapp-endpoint:
+    build: .
+    container_name: whatsapp-endpoint
+    restart: unless-stopped
+
+    # Port mapping - accessible from host
+    ports:
+      - "8200:8200"
+
+    # Mount volume so store.db (WhatsApp session) persists across restarts/updates
+    volumes:
+      - wa_data:/app/data
+
+    environment:
+      # Required
+      DATABASE_URL: ${DATABASE_URL}
+      LANGCHAIN_API_URL: ${LANGCHAIN_API_URL}
+
+      # Optional - leave empty to use internal processing (bypass N8N)
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:-}
+
+      # Where store.db is saved inside the container
+      DATA_DIR: /app/data
+
+      # HTTP port (default: 8101)
+      PORT: 8200
+
+    # Keep stdin open so QR code can be displayed during first-time setup
+    stdin_open: true
+    tty: true
+
+volumes:
+  wa_data:
+    name: whatsapp_session_data

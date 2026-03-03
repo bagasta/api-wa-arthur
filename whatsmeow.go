@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -18,9 +19,10 @@ import (
 
 var WAClient *whatsmeow.Client
 
-func ConnectWhatsapp() {
+func ConnectWhatsapp(dataDir string) {
 	dbLog := waLog.Stdout("Database", "DEBUG", true)
-	container, err := sqlstore.New(context.Background(), "sqlite3", "file:store.db?_foreign_keys=on", dbLog)
+	dbPath := fmt.Sprintf("file:%s/store.db?_foreign_keys=on", dataDir)
+	container, err := sqlstore.New(context.Background(), "sqlite3", dbPath, dbLog)
 	if err != nil {
 		log.Fatalf("Fatal: failed to open whatsapp store: %v", err)
 	}
