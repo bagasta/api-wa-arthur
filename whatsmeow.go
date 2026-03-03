@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/mdp/qrterminal/v3"
@@ -95,24 +96,31 @@ func eventHandler(evt interface{}) {
 		webhookURL := os.Getenv("N8N_WEBHOOK_URL")
 		if webhookURL == "" {
 			log.Println("WARN: N8N_WEBHOOK_URL is not set. Directly processing internally...")
-			// Dummy wrap the payload so we can manually call our internal handler if not using N8N
+			// Process internally without blocking the event handler
 			go simulateN8nWebhook(chatID, senderName, text)
 			return
 		}
 
-		// Forward to N8N webhook trigger
-		payload := map[string]interface{}{
-			"chat_id":    chatID,
-			"first_name": senderName,
-			"text":       text,
-		}
-		jsonData, _ := json.Marshal(payload)
-		resp, err := http.Post(webhookURL, "application/json", bytes.NewBuffer(jsonData))
-		if err != nil {
-			log.Printf("ERROR: Failed to forward to N8N webhook: %v", err)
-		} else {
-			resp.Body.Close()
-		}
+		// Forward to N8N webhook — non-blocking goroutine with timeout
+		go func() {
+			payload := map[string]interface{}{
+				"session_id":   chatID,
+				"from":         chatID,
+				"sender_lid":   v.Info.Sender.String(),
+				"message":      text,
+				"push_name":    senderName,
+				"message_type": "text",
+				"is_group":     false,
+			}
+			jsonData, _ := json.Marshal(payload)
+			client := &http.Client{Timeout: 30 * time.Second}
+			resp, err := client.Post(webhookURL, "application/json", bytes.NewBuffer(jsonData))
+			if err != nil {
+				log.Printf("ERROR: Failed to forward to N8N webhook: %v", err)
+			} else {
+				resp.Body.Close()
+			}
+		}()
 	}
 }
 
