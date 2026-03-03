@@ -1,0 +1,17 @@
+# Environment variables (SENSITIVE - DO NOT COMMIT)
+.env
+
+# WhatsApp session file (SENSITIVE - contains encryption keys)
+store.db
+*.db
+
+# Go compiled binary
+whatsapp-endpoint
+/whatsapp-endpoint
+
+# Go build cache
+/tmp/
+
+# OS files
+.DS_Store
+Thumbs.db
