@@ -1,5 +1,8 @@
 # ─── Stage 1: Builder ────────────────────────────────────────────────────────
-FROM golang:1.22-bookworm AS builder
+FROM golang:1.24-bookworm AS builder
+
+# Allow Go toolchain manager to auto-download Go 1.25.0 as required by go.mod
+ENV GOTOOLCHAIN=auto
 
 WORKDIR /app
 
