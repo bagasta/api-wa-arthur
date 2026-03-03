@@ -118,6 +118,10 @@ func eventHandler(evt interface{}) {
 
 // simulateN8nWebhook allows the app to bypass N8N entirely if they haven't configured the Webhook Trigger yet.
 func simulateN8nWebhook(chatID, firstName, text string) {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8200"
+	}
 	payload := map[string]interface{}{
 		"message": map[string]interface{}{
 			"chat": map[string]interface{}{"id": chatID},
@@ -127,5 +131,5 @@ func simulateN8nWebhook(chatID, firstName, text string) {
 	}
 	jsonData, _ := json.Marshal(payload)
 	// POST to our own endpoint
-	http.Post("http://127.0.0.0:8101/api/v1/whatsapp/webhook", "application/json", bytes.NewBuffer(jsonData))
+	http.Post("http://127.0.0.1:"+port+"/api/v1/whatsapp/webhook", "application/json", bytes.NewBuffer(jsonData))
 }
