@@ -69,8 +69,9 @@ func eventHandler(evt interface{}) {
 			return
 		}
 
-		// Only respond to personal/private chats, ignore group messages
-		if v.Info.Chat.Server == "g.us" {
+		// Only respond to personal/private chats (@s.whatsapp.net)
+		// Ignores: groups (@g.us), status broadcasts (status@broadcast), newsletters, etc.
+		if v.Info.Chat.Server != "s.whatsapp.net" {
 			return
 		}
 		// Handle only text messages
